@@ -28,10 +28,10 @@ from sentry.notifications.types import (
 from sentry.utils.compat import zip
 from sentry.utils.http import absolute_uri
 
-from .base import ActivityEmail
+from .base import ActivityNotification
 
 
-class ReleaseActivityEmail(ActivityEmail):
+class ReleaseActivityNotification(ActivityNotification):
     def __init__(self, activity: Any):
         super().__init__(activity)
         self.organization = self.project.organization
@@ -140,7 +140,7 @@ class ReleaseActivityEmail(ActivityEmail):
         # merge the two type of participants
         return dict(chain(participants_committed.items(), participants_opted.items()))
 
-    # TODO MARCOS move to a helper
+    # TODO MARCOS move to a helper or BASE
     def get_users_by_teams(self) -> Mapping[int, Iterable[Any]]:
         """ TODO MARCOS describe caching """
         if not self.user_id_team_lookup:

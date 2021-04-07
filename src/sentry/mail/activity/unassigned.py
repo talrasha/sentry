@@ -1,9 +1,9 @@
 from typing import Mapping, Tuple
 
-from .base import ActivityEmail
+from .base import ActivityNotification
 
 
-class UnassignedActivityEmail(ActivityEmail):
+class UnassignedActivityNotification(ActivityNotification):
     def get_activity_name(self) -> str:
         return "Unassigned"
 

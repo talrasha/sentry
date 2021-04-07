@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
-from .base import ActivityEmail
+from .base import ActivityNotification
 
 
-class NoteActivityEmail(ActivityEmail):
+class NoteActivityNotification(ActivityNotification):
     def get_context(self) -> Dict[str, Any]:
         return {}
 

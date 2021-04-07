@@ -8,7 +8,7 @@ from sentry.models import (
 from sentry.models.integration import ExternalProviders
 from sentry.utils.http import absolute_uri
 
-from .base import ActivityEmail
+from .base import ActivityNotification
 
 
 def summarize_issues(issues: Iterable[Any]) -> Iterable[Mapping[str, str]]:
@@ -27,9 +27,9 @@ def summarize_issues(issues: Iterable[Any]) -> Iterable[Mapping[str, str]]:
     return rv
 
 
-class NewProcessingIssuesActivityEmail(ActivityEmail):
+class NewProcessingIssuesActivityNotification(ActivityNotification):
     def __init__(self, activity: Any) -> None:
-        ActivityEmail.__init__(self, activity)
+        ActivityNotification.__init__(self, activity)
         self.issues = summarize_issues(self.activity.data["issues"])
 
     def get_participants(self) -> Mapping[Any, GroupSubscriptionReason]:

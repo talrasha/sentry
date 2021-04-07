@@ -1,20 +1,20 @@
-from sentry.mail.activity.assigned import AssignedActivityEmail
-from sentry.mail.activity.new_processing_issues import NewProcessingIssuesActivityEmail
-from sentry.mail.activity.note import NoteActivityEmail
-from sentry.mail.activity.regression import RegressionActivityEmail
-from sentry.mail.activity.release import ReleaseActivityEmail
-from sentry.mail.activity.resolved import ResolvedActivityEmail
-from sentry.mail.activity.resolved_in_release import ResolvedInReleaseActivityEmail
-from sentry.mail.activity.unassigned import UnassignedActivityEmail
+from sentry.mail.activity.assigned import AssignedActivityNotification
+from sentry.mail.activity.new_processing_issues import NewProcessingIssuesActivityNotification
+from sentry.mail.activity.note import NoteActivityNotification
+from sentry.mail.activity.regression import RegressionActivityNotification
+from sentry.mail.activity.release import ReleaseActivityNotification
+from sentry.mail.activity.resolved import ResolvedActivityNotification
+from sentry.mail.activity.resolved_in_release import ResolvedInReleaseActivityNotification
+from sentry.mail.activity.unassigned import UnassignedActivityNotification
 from sentry.models.activity import Activity
 
 emails = {
-    Activity.ASSIGNED: AssignedActivityEmail,
-    Activity.NOTE: NoteActivityEmail,
-    Activity.DEPLOY: ReleaseActivityEmail,
-    Activity.SET_REGRESSION: RegressionActivityEmail,
-    Activity.SET_RESOLVED: ResolvedActivityEmail,
-    Activity.SET_RESOLVED_IN_RELEASE: ResolvedInReleaseActivityEmail,
-    Activity.UNASSIGNED: UnassignedActivityEmail,
-    Activity.NEW_PROCESSING_ISSUES: NewProcessingIssuesActivityEmail,
+    Activity.ASSIGNED: AssignedActivityNotification,
+    Activity.NOTE: NoteActivityNotification,
+    Activity.DEPLOY: ReleaseActivityNotification,
+    Activity.SET_REGRESSION: RegressionActivityNotification,
+    Activity.SET_RESOLVED: ResolvedActivityNotification,
+    Activity.SET_RESOLVED_IN_RELEASE: ResolvedInReleaseActivityNotification,
+    Activity.UNASSIGNED: UnassignedActivityNotification,
+    Activity.NEW_PROCESSING_ISSUES: NewProcessingIssuesActivityNotification,
 }

@@ -16,7 +16,7 @@ from sentry.utils.http import absolute_uri
 from sentry.utils.linksign import generate_signed_link
 
 
-class ActivityEmail:
+class ActivityNotification:
     def __init__(self, activity: Any):
         self.activity = activity
         self.project = activity.project
@@ -216,6 +216,7 @@ class ActivityEmail:
         return str(mark_safe(description.format(**context)))
 
     def send(self) -> None:
+        """ TODO MARCOS DESCRIBE """
         if not self.should_email():
             return
 
