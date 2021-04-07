@@ -1,6 +1,5 @@
 import itertools
 import logging
-from enum import Enum
 from typing import Set
 
 from django.utils import dateformat
@@ -26,6 +25,7 @@ from sentry.models import (
 )
 from sentry.notifications.helpers import transform_to_notification_settings_by_user
 from sentry.notifications.types import (
+    ActionTargetType,
     GroupSubscriptionReason,
     NotificationScopeType,
     NotificationSettingOptionValues,
@@ -45,16 +45,9 @@ from sentry.utils.linksign import generate_signed_link
 logger = logging.getLogger(__name__)
 
 
-class ActionTargetType(Enum):
-    ISSUE_OWNERS = "IssueOwners"
-    TEAM = "Team"
-    MEMBER = "Member"
-
-
+# TODO MARCOS 5 Move all this to notifications
 class MailAdapter:
-    """
-    This class contains generic logic for notifying users via Email.
-    """
+    """ This class contains generic logic for notifying users via Email. """
 
     mail_option_key = "mail:subject_prefix"
 
