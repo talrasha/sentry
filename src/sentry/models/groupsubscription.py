@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Mapping
+from typing import Any, Dict, Mapping
 
 from django.conf import settings
 from django.db import IntegrityError, models, transaction
@@ -82,7 +82,7 @@ class GroupSubscriptionManager(BaseManager):
                 if i == 0:
                     raise e
 
-    def get_participants(self, group) -> Mapping[Any, Mapping[Any, GroupSubscriptionReason]]:
+    def get_participants(self, group: Any) -> Mapping[Any, Mapping[Any, GroupSubscriptionReason]]:
         """
         Identify all users who are participating with a given issue.
         :param group: Group object

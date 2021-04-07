@@ -1,3 +1,4 @@
+from typing import Any, Dict, List, Mapping, Tuple
 from urllib.parse import urlparse, urlunparse
 
 from django.core.urlresolvers import reverse
@@ -16,25 +17,26 @@ from sentry.utils.linksign import generate_signed_link
 
 
 class ActivityEmail:
-    def __init__(self, activity):
+    def __init__(self, activity: Any):
         self.activity = activity
         self.project = activity.project
         self.organization = self.project.organization
         self.group = activity.group
 
-    def _get_subject_prefix(self):
+    def _get_subject_prefix(self) -> str:
         prefix = ProjectOption.objects.get_value(project=self.project, key="mail:subject_prefix")
         if not prefix:
             prefix = options.get("mail.subject-prefix")
-        return prefix
+        return str(prefix)
 
-    def should_email(self):
+    def should_email(self) -> bool:
         return True
 
-    def get_participants(self):
+    # TODO MARCOS 1
+    def get_participants(self) -> Mapping[Any, GroupSubscriptionReason]:
         # TODO(dcramer): not used yet today except by Release's
         if not self.group:
-            return []
+            return {}
 
         participants = GroupSubscription.objects.get_participants(group=self.group)[
             ExternalProviders.EMAIL
@@ -53,20 +55,20 @@ class ActivityEmail:
 
         return participants
 
-    def get_template(self):
+    def get_template(self) -> str:
         return "sentry/emails/activity/generic.txt"
 
-    def get_html_template(self):
+    def get_html_template(self) -> str:
         return "sentry/emails/activity/generic.html"
 
-    def get_project_link(self):
-        return absolute_uri(f"/{self.organization.slug}/{self.project.slug}/")
+    def get_project_link(self) -> str:
+        return str(absolute_uri(f"/{self.organization.slug}/{self.project.slug}/"))
 
-    def get_group_link(self):
+    def get_group_link(self) -> str:
         referrer = self.__class__.__name__
-        return self.group.get_absolute_url(params={"referrer": referrer})
+        return str(self.group.get_absolute_url(params={"referrer": referrer}))
 
-    def get_base_context(self):
+    def get_base_context(self) -> Dict[str, Any]:
         activity = self.activity
 
         context = {
@@ -79,9 +81,9 @@ class ActivityEmail:
             context.update(self.get_group_context())
         return context
 
-    def get_group_context(self):
+    def get_group_context(self) -> Mapping[str, Any]:
         group_link = self.get_group_link()
-        parts = list(urlparse(group_link))
+        parts: List[str] = list(urlparse(group_link))
         parts[2] = parts[2].rstrip("/") + "/activity/"
         activity_link = urlunparse(parts)
 
@@ -92,27 +94,19 @@ class ActivityEmail:
             "referrer": self.__class__.__name__,
         }
 
-    def get_email_type(self):
+    def get_email_type(self) -> str:
         return f"notify.activity.{self.activity.get_type_display()}"
 
-    def get_subject(self):
+    def get_subject(self) -> str:
         group = self.group
 
         return f"{group.qualified_short_id} - {group.title}"
 
-    def get_subject_with_prefix(self):
+    def get_subject_with_prefix(self) -> bytes:
         return f"{self._get_subject_prefix()}{self.get_subject()}".encode("utf-8")
 
-    def get_context(self):
-        description = self.get_description()
-        try:
-            description, params, html_params = description
-        except ValueError:
-            try:
-                description, params = description
-                html_params = params
-            except ValueError:
-                params, html_params = {}, {}
+    def get_context(self) -> Dict[str, Any]:
+        description, params, html_params = self.get_description()
 
         return {
             "activity_name": self.get_activity_name(),
@@ -120,14 +114,24 @@ class ActivityEmail:
             "html_description": self.description_as_html(description, html_params),
         }
 
-    def get_user_context(self, user):
+    def get_user_context(self, user: Any) -> Dict[Any, Any]:
         # use in case context of email changes depending on user
         return {}
 
-    def get_category(self):
+    def get_activity_name(self) -> str:
         raise NotImplementedError
 
-    def get_headers(self):
+    def get_category(self) -> str:
+        raise NotImplementedError
+
+    def get_description(self) -> Tuple[str, Mapping[str, str], Mapping[str, str]]:
+        """
+        Get the description for this activity. Some description strings
+        need extra parameters which are passed alongside in the tuple.
+        """
+        raise NotImplementedError
+
+    def get_headers(self) -> Mapping[str, str]:
         project = self.project
         group = self.group
 
@@ -147,10 +151,7 @@ class ActivityEmail:
 
         return headers
 
-    def get_description(self):
-        raise NotImplementedError
-
-    def avatar_as_html(self):
+    def avatar_as_html(self) -> Any:
         user = self.activity.user
         if not user:
             return '<img class="avatar" src="{}" width="20px" height="20px" />'.format(
@@ -164,11 +165,13 @@ class ActivityEmail:
         else:
             return get_email_avatar(user.get_display_name(), user.get_label(), 20, True)
 
-    def _get_sentry_avatar_url(self):
+    @staticmethod
+    def _get_sentry_avatar_url() -> str:
         url = "/images/sentry-email-avatar.png"
-        return absolute_uri(get_asset_url("sentry", url))
+        return str(absolute_uri(get_asset_url("sentry", url)))
 
-    def _get_user_avatar_url(self, user, size=20):
+    @staticmethod
+    def _get_user_avatar_url(user: Any, size: int = 20) -> str:
         try:
             avatar = UserAvatar.objects.get(user=user)
         except UserAvatar.DoesNotExist:
@@ -177,9 +180,9 @@ class ActivityEmail:
         url = reverse("sentry-user-avatar-url", args=[avatar.ident])
         if size:
             url = f"{url}?s={int(size)}"
-        return absolute_uri(url)
+        return str(absolute_uri(url))
 
-    def description_as_text(self, description, params):
+    def description_as_text(self, description: str, params: Mapping[str, Any]) -> str:
         user = self.activity.user
         if user:
             name = user.name or user.email
@@ -193,7 +196,7 @@ class ActivityEmail:
 
         return description.format(**context)
 
-    def description_as_html(self, description, params):
+    def description_as_html(self, description: str, params: Mapping[str, Any]) -> str:
         user = self.activity.user
         if user:
             name = user.get_display_name()
@@ -210,12 +213,13 @@ class ActivityEmail:
         context = {"author": author, "an issue": an_issue}
         context.update(params)
 
-        return mark_safe(description.format(**context))
+        return str(mark_safe(description.format(**context)))
 
-    def send(self):
+    def send(self) -> None:
         if not self.should_email():
             return
 
+        # TODO MARCOS 2
         participants = self.get_participants()
         if not participants:
             return

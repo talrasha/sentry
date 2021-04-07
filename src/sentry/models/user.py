@@ -1,5 +1,8 @@
 import logging
 import warnings
+from typing import Any, Sequence
+
+from django.db.models.query import QuerySet
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
@@ -19,14 +22,27 @@ audit_logger = logging.getLogger("sentry.audit.user")
 
 
 class UserManager(BaseManager, DjangoUserManager):
-    def get_from_group(self, group):
+    def get_team_members_with_verified_email_for_projects(self, projects: Sequence[Any]) -> QuerySet:
+        from sentry.models import ProjectTeam, Team
+
+        return self.filter(
+            emails__is_verified=True,
+            sentry_orgmember_set__teams__in=Team.objects.filter(
+                id__in=ProjectTeam.objects.filter(project__in=projects).values_list(
+                    "team_id", flat=True
+                )
+            ),
+            is_active=True,
+        )
+
+    def get_from_group(self, group: Any) -> QuerySet:
         """ Get a queryset of all users in all teams in a given Group's project. """
         return self.filter(
             sentry_orgmember_set__teams__in=group.project.teams.all(),
             is_active=True,
         )
 
-    def get_from_teams(self, organization_id, teams):
+    def get_from_teams(self, organization_id: int, teams: Sequence[Any]) -> QuerySet:
         return self.filter(
             sentry_orgmember_set__organization_id=organization_id,
             sentry_orgmember_set__organizationmemberteam__team__in=teams,
@@ -34,7 +50,7 @@ class UserManager(BaseManager, DjangoUserManager):
             is_active=True,
         )
 
-    def get_from_projects(self, organization_id, projects):
+    def get_from_projects(self, organization_id: int, projects: Sequence[Any]) -> QuerySet:
         """
         Returns users associated with a project based on their teams.
         """
@@ -165,8 +181,8 @@ class User(BaseModel, AbstractBaseUser):
     def has_unverified_emails(self):
         return self.get_unverified_emails().exists()
 
-    def get_label(self):
-        return self.email or self.username or self.id
+    def get_label(self) -> str:
+        return str(self.email or self.username or self.id)
 
     def get_display_name(self):
         return self.name or self.email or self.username
