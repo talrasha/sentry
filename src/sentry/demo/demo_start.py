@@ -1,12 +1,11 @@
 import logging
 
-from django.http import Http404
 from django.conf import settings
+from django.http import Http404
 
 from sentry.models import OrganizationMember, OrganizationStatus
 from sentry.utils import auth
 from sentry.web.frontend.base import BaseView
-
 
 logger = logging.getLogger(__name__)
 
