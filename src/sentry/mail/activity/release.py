@@ -34,6 +34,8 @@ from .base import ActivityNotification
 class ReleaseActivityNotification(ActivityNotification):
     def __init__(self, activity: Any):
         super().__init__(activity)
+        # TODO MARCOS 6 most of this should be moved to helper
+
         self.organization = self.project.organization
         self.user_id_team_lookup: Optional[Mapping[int, Iterable[Any]]] = None
         self.email_list: Set[str] = set()
@@ -111,8 +113,11 @@ class ReleaseActivityNotification(ActivityNotification):
     def should_email(self) -> bool:
         return bool(self.release and self.deploy)
 
-    def get_participants(self) -> Dict[Any, GroupSubscriptionReason]:
-        users = list(User.objects.get_team_members_with_verified_email_for_projects(self.projects).distinct())
+    def get_participants(self) -> Mapping[ExternalProviders, Mapping[Any, GroupSubscriptionReason]]:
+        """ TODO MARCOS DESCRIBE """
+        users = list(
+            User.objects.get_team_members_with_verified_email_for_projects(self.projects).distinct()
+        )
         notification_settings = NotificationSetting.objects.get_for_users_by_parent(
             NotificationSettingTypes.DEPLOY,
             users=users,
@@ -120,25 +125,20 @@ class ReleaseActivityNotification(ActivityNotification):
         )
         users_with_options = get_values_by_user(users, notification_settings)
 
-        # filter down to members which have been seen in the commit log:
-        participants_committed = {
-            user: GroupSubscriptionReason.committed
-            for user, option in users_with_options.items()
-            if (
-                option == NotificationSettingOptionValues.COMMITTED_ONLY
-                and user.id in self.user_ids
-            )
-        }
+        users_to_reasons = defaultdict(dict)
+        for user, options_by_provider in users_with_options.items():
+            for provider, option in options_by_provider.items():
+                # members who opt into all deploy emails:
+                if option == NotificationSettingOptionValues.ALWAYS:
+                    users_to_reasons[provider][user] = GroupSubscriptionReason.deploy_setting
 
-        # or who opt into all deploy emails:
-        participants_opted = {
-            user: GroupSubscriptionReason.deploy_setting
-            for user, option in users_with_options.items()
-            if option == NotificationSettingOptionValues.ALWAYS
-        }
-
-        # merge the two type of participants
-        return dict(chain(participants_committed.items(), participants_opted.items()))
+                # members which have been seen in the commit log
+                elif (
+                    option == NotificationSettingOptionValues.COMMITTED_ONLY
+                    and user.id in self.user_ids
+                ):
+                    users_to_reasons[provider][user] = GroupSubscriptionReason.committed
+        return users_to_reasons
 
     # TODO MARCOS move to a helper or BASE
     def get_users_by_teams(self) -> Mapping[int, Iterable[Any]]:

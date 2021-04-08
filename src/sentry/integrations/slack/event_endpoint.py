@@ -27,6 +27,7 @@ class SlackEventEndpoint(Endpoint):
     def on_url_verification(self, request, data):
         return self.respond({"challenge": data["challenge"]})
 
+    # TODO MARCOS 8
     def on_message(self, request, integration, token, data):
         channel = data["channel"]
         # if it's a message posted by our bot, we don't want to respond since

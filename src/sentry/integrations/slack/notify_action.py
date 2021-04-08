@@ -151,6 +151,7 @@ class SlackNotifyServiceAction(IntegrationEventAction):
             "tags": {"type": "string", "placeholder": "i.e environment,user,my_tag"},
         }
 
+    # TODO MARCOS 8
     def after(self, event, state):
         channel = self.get_option("channel_id")
         tags = set(self.get_tags_list())

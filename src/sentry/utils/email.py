@@ -380,6 +380,7 @@ class MessageBuilder:
             self.get_built_messages(to, cc=cc, bcc=bcc), fail_silently=fail_silently
         )
 
+    # TODO MARCOS 7
     def send_async(self, to=None, cc=None, bcc=None):
         from sentry.tasks.email import send_email
 

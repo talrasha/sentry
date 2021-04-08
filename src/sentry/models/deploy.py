@@ -1,9 +1,3 @@
-"""
-sentry.models.deploy
-~~~~~~~~~~~~~~~~~~~~
-"""
-
-
 from django.db import models
 from django.utils import timezone
 
@@ -67,7 +61,7 @@ class Deploy(Model):
                         return
 
             activity = None
-            for project in deploy.release.projects.all():
+            for project in release.projects.all():
                 activity = Activity.objects.create(
                     type=Activity.DEPLOY,
                     project=project,

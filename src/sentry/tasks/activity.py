@@ -20,6 +20,7 @@ def get_activity_notifiers(project):
         for notifier in safe_execute(plugin.get_notifiers, _with_transaction=False) or ():
             results.append(notifier)
 
+    # TODO MARCOS FIRST Do we need a Notifications Adapter?
     results.append(mail_adapter)
 
     return results
@@ -29,6 +30,7 @@ def get_activity_notifiers(project):
     name="sentry.tasks.activity.send_activity_notifications", queue="activity.notify"
 )
 def send_activity_notifications(activity_id):
+    # TODO MARCOS ?
     from sentry.models import Activity
 
     try:

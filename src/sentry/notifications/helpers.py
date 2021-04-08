@@ -285,24 +285,21 @@ def get_values_by_user(users: Sequence[Any], notification_settings: Sequence[Any
     options_by_user_id: Dict[int, Dict[str, int]] = defaultdict(dict)
     for notification_setting in notification_settings:
         scope_type = NotificationScopeType(notification_setting.scope_type)
-        key = (
-            "default"
-            if scope_type == NotificationScopeType.USER
-            else "org"
-        )
+        key = "default" if scope_type == NotificationScopeType.USER else "org"
         user_option = actor_mapping.get(notification_setting.target)
         if user_option:
-            options_by_user_id[user_option.id][key] = notification_setting
+            value = NotificationSettingOptionValues(notification_setting.value)
+            options_by_user_id[user_option.id][key] = value
 
     # and couple them with the the users' setting value for deploy-emails
     # prioritize user/org specific, then user default, then product default
-    users_with_options = {}
+    users_with_options: Dict[Any, Dict[ExternalProviders, NotificationSettingOptionValues]] = {}
     for user in users:
         options = options_by_user_id[user.id]
         users_with_options[user] = (
             options.get("org")  # org-specific
             or options.get("default")  # user default
-            or NotificationSettingOptionValues.COMMITTED_ONLY # product default
+            or NotificationSettingOptionValues.COMMITTED_ONLY  # product default
         )
 
     return users_with_options

@@ -191,7 +191,7 @@ class SlackActionRequest(SlackRequest):
     An Action request sent from Slack.
 
     Action requests nest their data inside of a ``payload`` key in the request
-    body, for some reason. Therefor they require an extra bit of data
+    body, for some reason. Therefore they require an extra bit of data
     validation.
     """
 

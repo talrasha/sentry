@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
 from django.core.urlresolvers import reverse
@@ -32,8 +32,8 @@ class ActivityNotification:
     def should_email(self) -> bool:
         return True
 
-    # TODO MARCOS 1
-    def get_participants(self) -> Mapping[Any, GroupSubscriptionReason]:
+    # TODO MARCOS 1 Move the logic to a helper, make this abstract, and import it when needed.
+    def get_participants(self) -> Mapping[ExternalProviders, Mapping[Any, GroupSubscriptionReason]]:
         # TODO(dcramer): not used yet today except by Release's
         if not self.group:
             return {}
@@ -53,7 +53,7 @@ class ActivityNotification:
             if not receive_own_activity:
                 del participants[self.activity.user]
 
-        return participants
+        return {ExternalProviders.EMAIL: participants}
 
     def get_template(self) -> str:
         return "sentry/emails/activity/generic.txt"
@@ -215,16 +215,42 @@ class ActivityNotification:
 
         return str(mark_safe(description.format(**context)))
 
+    @staticmethod
+    def get_unsubscribe_link(user_id: int, group_id: int) -> str:
+        return generate_signed_link(
+            user_id,
+            "sentry-account-email-unsubscribe-issue",
+            kwargs={"issue_id": group_id},
+        )
+
+    def update_user_context_from_group(
+        self,
+        user: Any,
+        reason: GroupSubscriptionReason,
+        context: Dict[str, Any],
+        group: Optional[Any],
+    ) -> Any:
+        if group:
+            context.update(
+                {
+                    "reason": GroupSubscriptionReason.descriptions.get(
+                        reason, "are subscribed to this issue"
+                    ),
+                    "unsubscribe_link": self.get_unsubscribe_link(user.id, group.id),
+                }
+            )
+        user_context = self.get_user_context(user)
+        user_context.update(context)
+        return user_context
+
     def send(self) -> None:
         """ TODO MARCOS DESCRIBE """
+
         if not self.should_email():
             return
 
-        # TODO MARCOS 2
-        participants = self.get_participants()
-        if not participants:
-            return
-
+        # TODO MARCOS why are we doing this renaming variables?
+        organization = self.organization
         activity = self.activity
         project = self.project
         group = self.group
@@ -232,40 +258,35 @@ class ActivityNotification:
         context = self.get_base_context()
         context.update(self.get_context())
 
-        template = self.get_template()
-        html_template = self.get_html_template()
-        email_type = self.get_email_type()
-        headers = self.get_headers()
+        for provider, mapping in self.get_participants().items():
+            if provider == ExternalProviders.SLACK:
+                integrations = get_integrations(organization, ExternalProviders.SLACK)
+                for integration in integrations:
+                    for user, reason in mapping.items():
+                        send_message(
+                            organization, integration, project, user, activity, group, context
+                        )
 
-        for user, reason in participants.items():
-            if group:
-                context.update(
-                    {
-                        "reason": GroupSubscriptionReason.descriptions.get(
-                            reason, "are subscribed to this issue"
-                        ),
-                        "unsubscribe_link": generate_signed_link(
-                            user.id,
-                            "sentry-account-email-unsubscribe-issue",
-                            kwargs={"issue_id": group.id},
-                        ),
-                    }
-                )
-            user_context = self.get_user_context(user)
-            if user_context:
-                user_context.update(context)
-            else:
-                user_context = context
+            elif provider == ExternalProviders.EMAIL:
+                # TODO MARCOS I might need to translate these to slack
+                template = self.get_template()
+                html_template = self.get_html_template()
+                email_type = self.get_email_type()
+                headers = self.get_headers()
 
-            msg = MessageBuilder(
-                subject=self.get_subject_with_prefix(),
-                template=template,
-                html_template=html_template,
-                headers=headers,
-                type=email_type,
-                context=user_context,
-                reference=activity,
-                reply_reference=group,
-            )
-            msg.add_users([user.id], project=project)
-            msg.send_async()
+                for user, reason in mapping.items():
+                    user_context = self.update_user_context_from_group(user, reason, context, group)
+
+                    msg = MessageBuilder(
+                        subject=self.get_subject_with_prefix(),
+                        template=template,
+                        html_template=html_template,
+                        headers=headers,
+                        type=email_type,
+                        context=user_context,
+                        reference=activity,
+                        reply_reference=group,
+                    )
+                    # TODO MARCOS how does project for for deploy notifications?
+                    msg.add_users([user.id], project=project)
+                    msg.send_async()

@@ -196,6 +196,7 @@ def get_channel_id_with_timeout(integration: Integration, name: str, timeout: in
     return (prefix, None, False)
 
 
+# TODO MARCOS 8
 def send_incident_alert_notification(action, incident, metric_value, method):
     from sentry.integrations.slack.message_builder.incidents import build_incident_attachment
 
@@ -245,9 +246,7 @@ def get_identity(user, organization_id, integration_id):
 
 
 def parse_link(url):
-    """
-    For data aggreggation purposes, rm unique information from URL
-    """
+    """ For data aggregation purposes, remove unique information from URL. """
 
     url_parts = list(urlparse(url))
     query = dict(parse_qs(url_parts[4]))

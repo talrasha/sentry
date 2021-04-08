@@ -1,5 +1,6 @@
 import logging
-from typing import Set
+from typing import Any, Set
+
 from urllib.error import HTTPError as UrllibHTTPError
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
@@ -76,6 +77,7 @@ class NotificationPlugin(Plugin):
                 raise err
             return False
 
+    # TODO MARCOS 5
     def rule_notify(self, event, futures):
         rules = []
         extra = {"event_id": event.event_id, "group_id": event.group_id, "plugin": self.slug}
@@ -98,10 +100,11 @@ class NotificationPlugin(Plugin):
     def notify_users(self, group, event, triggering_rules, fail_silently=False, **kwargs):
         raise NotImplementedError
 
-    def notify_about_activity(self, activity):
+    def notify_about_activity(self, activity: Activity) -> None:
+        """ Notify the relevant users about this Activity object. """
         pass
 
-    def get_notification_recipients(self, project, user_option: str) -> Set:
+    def get_notification_recipients(self, project, user_option: str) -> Set[Any]:
         from sentry.models import UserOption
 
         alert_settings = {

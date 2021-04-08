@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import Set
+from typing import Any, Set
 
 from django.utils import dateformat
 from django.utils.encoding import force_text
@@ -138,6 +138,7 @@ class MailAdapter:
         msg.add_users(send_to, project=project)
         return msg
 
+    # TODO MARCOS 7
     def _send_mail(self, *args, **kwargs):
         message = self._build_message(*args, **kwargs)
         if message is not None:
@@ -170,6 +171,7 @@ class MailAdapter:
             group.project
         )
 
+    # TODO MARCOS 9
     def get_send_to(self, project, target_type, target_identifier=None, event=None):
         """
         Returns a list of user IDs for the users that should receive
@@ -238,6 +240,7 @@ class MailAdapter:
         """ Get a set of users that have disabled Issue Alert notifications for a given project. """
         user_ids = project.member_set.values_list("user", flat=True)
         users = User.objects.filter(id__in=user_ids)
+        # TODO MARCOS 9 trace this up
         notification_settings = NotificationSetting.objects.get_for_users_by_parent(
             type=NotificationSettingTypes.ISSUE_ALERTS,
             parent=project,
@@ -265,6 +268,7 @@ class MailAdapter:
                     output.add(user.id)
         return output
 
+    # TODO MARCOS 9
     def get_send_to_team(self, project, target_identifier):
         if target_identifier is None:
             return []
@@ -316,6 +320,7 @@ class MailAdapter:
             kwargs={"project_id": project.id},
         )
 
+    # TODO MARCOS 7
     def notify(self, notification, target_type, target_identifier=None, **kwargs):
         metrics.incr("mail_adapter.notify")
         event = notification.event
@@ -406,6 +411,7 @@ class MailAdapter:
             "X-SMTPAPI": json.dumps({"category": "issue_alert_email"}),
         }
 
+        # TODO MARCOS 9
         for user_id in self.get_send_to(
             project=project,
             target_type=target_type,
@@ -424,6 +430,7 @@ class MailAdapter:
             )
 
             self.add_unsubscribe_link(context, user_id, project, "alert_email")
+            # TODO MARCOS FIRST sending email for ISSUE_ALERT
             self._send_mail(
                 subject=subject,
                 template=template,
@@ -444,6 +451,7 @@ class MailAdapter:
             date=dateformat.format(date, "N j, Y, P e"),
         )
 
+    # TODO MARCOS Double check that this is reading the correct setting.
     def notify_digest(self, project, digest, target_type, target_identifier=None):
         metrics.incr("mail_adapter.notify_digest")
         user_ids = self.get_send_to(project, target_type, target_identifier)
@@ -503,20 +511,23 @@ class MailAdapter:
                 send_to=[user_id],
             )
 
-    def notify_about_activity(self, activity):
+    # TODO is this actually used?
+    def notify_about_activity(self, activity: Any) -> None:
+        """ See NotificationPlugin base. """
         metrics.incr("mail_adapter.notify_about_activity")
         # TODO: We should move these into the `mail` module.
         from sentry.mail.activity import emails
+
+        # TODO MARCOS is this it?
 
         email_cls = emails.get(activity.type)
         if not email_cls:
             logger.debug(f"No email associated with activity type `{activity.get_type_display()}`")
             return
 
-        email = email_cls(activity)
-        email.send()
+        email_cls(activity).send()
 
-    def handle_user_report(self, payload, project, **kwargs):
+    def handle_user_report(self, payload, project):
         metrics.incr("mail_adapter.handle_user_report")
         group = Group.objects.get(id=payload["report"]["issue"]["id"])
 
