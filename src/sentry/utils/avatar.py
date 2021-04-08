@@ -18,7 +18,9 @@ from sentry.utils.compat import map
 from sentry.utils.hashlib import md5_text
 
 
-def get_gravatar_url(email: str, size: Optional[int] = None, default: Union[int, str] = "mm") -> str:
+def get_gravatar_url(
+    email: str, size: Optional[int] = None, default: Union[int, str] = "mm"
+) -> str:
     if email is None:
         email = ""
     gravatar_url = "{}/avatar/{}".format(
@@ -66,10 +68,7 @@ def get_letter_avatar_color(identifier: str) -> str:
 
 
 def get_letter_avatar(
-    display_name: str,
-    identifier: str,
-    size: Optional[int] = None,
-    use_svg: bool = True
+    display_name: str, identifier: str, size: Optional[int] = None, use_svg: bool = True
 ) -> str:
     display_name = (display_name or "").strip() or "?"
     names = display_name.split(" ")

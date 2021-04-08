@@ -22,7 +22,9 @@ audit_logger = logging.getLogger("sentry.audit.user")
 
 
 class UserManager(BaseManager, DjangoUserManager):
-    def get_team_members_with_verified_email_for_projects(self, projects: Sequence[Any]) -> QuerySet:
+    def get_team_members_with_verified_email_for_projects(
+        self, projects: Sequence[Any]
+    ) -> QuerySet:
         from sentry.models import ProjectTeam, Team
 
         return self.filter(

@@ -26,14 +26,14 @@ class AssignedActivityNotification(ActivityNotification):
                 return (
                     "{author} assigned {an issue} to {assignee}",
                     {"assignee": assignee.get_display_name()},
-                    {}
+                    {},
                 )
 
             if data.get("assigneeEmail"):
                 return (
                     "{author} assigned {an issue} to {assignee}",
                     {"assignee": data["assigneeEmail"]},
-                    {}
+                    {},
                 )
 
             return "{author} assigned {an issue} to an unknown user", {}, {}
