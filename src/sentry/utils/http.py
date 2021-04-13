@@ -1,7 +1,6 @@
 from collections import namedtuple
-from typing import Optional
-
 from functools import partial
+from typing import Optional
 from urllib.parse import parse_qs, quote, urlencode, urljoin, urlparse
 
 from django.conf import settings
