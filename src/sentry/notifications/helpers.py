@@ -279,7 +279,9 @@ def get_user_subscriptions_for_groups(
     return results
 
 
-def get_values_by_user(users: Sequence[Any], notification_settings: Sequence[Any]) -> Dict[Any, NotificationSettingOptionValues]:
+def get_values_by_user(
+    users: Sequence[Any], notification_settings: Sequence[Any]
+) -> Dict[Any, NotificationSettingOptionValues]:
     actor_mapping = {user.actor: user for user in users}
 
     options_by_user_id: Dict[int, Dict[str, int]] = defaultdict(dict)
@@ -303,4 +305,3 @@ def get_values_by_user(users: Sequence[Any], notification_settings: Sequence[Any
         )
 
     return users_with_options
-
