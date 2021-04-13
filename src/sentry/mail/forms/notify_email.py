@@ -1,7 +1,7 @@
 from django import forms
 
 from sentry.mail.forms.member_team import MemberTeamForm
-from sentry.notifications.types import ActionTargetType, ACTION_CHOICES
+from sentry.notifications.types import ACTION_CHOICES, ActionTargetType
 
 
 class NotifyEmailForm(MemberTeamForm):
