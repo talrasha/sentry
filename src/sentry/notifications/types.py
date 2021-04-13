@@ -199,4 +199,3 @@ ASSIGNEE_CHOICES = [
     (AssigneeTargetType.TEAM.value, "Team"),
     (AssigneeTargetType.MEMBER.value, "Member"),
 ]
-
