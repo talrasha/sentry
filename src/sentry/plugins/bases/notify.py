@@ -1,6 +1,5 @@
 import logging
 from typing import Any, Set
-
 from urllib.error import HTTPError as UrllibHTTPError
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
