@@ -1,6 +1,6 @@
 from sentry.mail import mail_adapter
 from sentry.mail.forms.notify_email import NotifyEmailForm
-from sentry.notifications.types import ActionTargetType, ACTION_CHOICES
+from sentry.notifications.types import ACTION_CHOICES, ActionTargetType
 from sentry.rules.actions.base import EventAction
 from sentry.utils import metrics
 
