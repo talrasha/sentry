@@ -1,10 +1,6 @@
 from typing import Any, Dict, Iterable, Mapping
 
-from sentry.models import (
-    EventError,
-    GroupSubscriptionReason,
-    NotificationSetting,
-)
+from sentry.models import EventError, GroupSubscriptionReason, NotificationSetting
 from sentry.models.integration import ExternalProviders
 from sentry.utils.http import absolute_uri
 
