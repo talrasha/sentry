@@ -2,13 +2,12 @@ import logging
 import warnings
 from typing import Any, Sequence
 
-from django.db.models.query import QuerySet
-
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.contrib.auth.signals import user_logged_out
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError, models, transaction
+from django.db.models.query import QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
