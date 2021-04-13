@@ -5,8 +5,6 @@ Note: Also see letterAvatar.jsx. Anything changed in this file (how colors are
 from typing import Any, Dict, Optional, Union
 from urllib.parse import urlencode
 
-from urllib.parse import urlencode
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
