@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Iterable, Mapping, Optional
 
-
 from sentry.constants import ObjectStatus
 from sentry.integrations.slack.client import SlackClient
 from sentry.models import Integration
