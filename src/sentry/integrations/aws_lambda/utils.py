@@ -23,6 +23,7 @@ SUPPORTED_RUNTIMES = [
 
 INVALID_LAYER_TEXT = "Invalid existing layer %s"
 MISSING_ROLE_TEXT = "Invalid role associated with the lambda function"
+TOO_MANY_REQUESTS_TEXT = "Something went wrong! Please enable function manually"
 
 DEFAULT_NUM_RETRIES = 3
 
@@ -313,6 +314,20 @@ def get_invalid_layer_name(err_message):
     return None
 
 
+def get_too_many_requests_error_message(err_message):
+    """
+    Check to see if an error matches the Too many requests error text
+    :param err_message: error string
+    :return boolean value if the error matches the too many requests error
+    """
+    too_many_requests_err = (
+        "An error occurred (TooManyRequestsException) when calling the "
+        "UpdateFunctionConfiguration operation (reached max retries: 4): "
+        "Rate exceeded"
+    )
+    return err_message == too_many_requests_err
+
+
 def get_missing_role_error(err_message):
     """
     Check to see if an error matches the missing role text
@@ -341,6 +356,9 @@ def get_sentry_err_message(err_message):
     missing_role = get_missing_role_error(err_message)
     if missing_role:
         return True, MISSING_ROLE_TEXT
+    too_many_requests = get_too_many_requests_error_message(err_message)
+    if too_many_requests:
+        return True, TOO_MANY_REQUESTS_TEXT
     return False, err_message
 
 
