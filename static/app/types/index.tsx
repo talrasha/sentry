@@ -305,6 +305,7 @@ export type Team = {
   isPending: boolean;
   memberCount: number;
   avatar: Avatar;
+  externalTeams: ExternalTeam[];
 };
 
 export type TeamWithProjects = Team & {projects: Project[]};
@@ -2024,3 +2025,25 @@ export type KeyValueListData = {
   subjectDataTestId?: string;
   subjectIcon?: React.ReactNode;
 }[];
+
+export type ExternalActorMapping = {
+  id: string;
+  externalName: string;
+  memberId?: string;
+  teamId?: string;
+  sentryName: string;
+};
+
+export type ExternalUser = {
+  id: string;
+  memberId: string;
+  externalName: string;
+  provider: string;
+};
+
+export type ExternalTeam = {
+  id: string;
+  teamId: string;
+  externalName: string;
+  provider: string;
+};
