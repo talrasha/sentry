@@ -6,8 +6,6 @@ from sentry.api.serializers import Serializer, register, serialize
 from sentry.integrations import IntegrationProvider
 from sentry.models import (
     ExternalIssue,
-    ExternalTeam,
-    ExternalUser,
     Group,
     GroupLink,
     Integration,
@@ -15,7 +13,6 @@ from sentry.models import (
     User,
 )
 from sentry.shared_integrations.exceptions import ApiError
-from sentry.types.integrations import get_provider_string
 
 logger = logging.getLogger(__name__)
 
@@ -238,31 +235,3 @@ class IntegrationIssueSerializer(IntegrationSerializer):
         data = super().serialize(obj, attrs, user)
         data["externalIssues"] = attrs.get("external_issues", [])
         return data
-
-
-@register(ExternalTeam)
-class ExternalTeamSerializer(Serializer):  # type: ignore
-    def serialize(
-        self, obj: Any, attrs: Mapping[str, Any], user: User, **kwargs: Any
-    ) -> MutableMapping[str, Any]:
-        provider = get_provider_string(obj.provider)
-        return {
-            "id": str(obj.id),
-            "teamId": str(obj.team_id),
-            "provider": provider,
-            "externalName": obj.external_name,
-        }
-
-
-@register(ExternalUser)
-class ExternalUserSerializer(Serializer):  # type: ignore
-    def serialize(
-        self, obj: Any, attrs: Mapping[str, Any], user: User, **kwargs: Any
-    ) -> MutableMapping[str, Any]:
-        provider = get_provider_string(obj.provider)
-        return {
-            "id": str(obj.id),
-            "memberId": str(obj.organizationmember_id),
-            "provider": provider,
-            "externalName": obj.external_name,
-        }
